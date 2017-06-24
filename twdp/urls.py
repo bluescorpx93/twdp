@@ -17,6 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from rango import urls
 from registration.backends.simple.views import RegistrationView
+from twdp import views
 
 class MyRegistrationView(RegistrationView):
 	def get_success_url(self,request, user):
@@ -28,6 +29,7 @@ class MyRegistrationView(RegistrationView):
 # 		return '/rango/'
 
 urlpatterns =	[
+	url(r'^$', views.root_page ),
 	url(r'^admin/', include(admin.site.urls)),
 	url(r'^rango/', include(urls)), 
 	url(r'^accounts/', include('registration.backends.simple.urls')),

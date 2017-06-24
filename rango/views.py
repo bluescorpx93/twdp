@@ -40,12 +40,6 @@ def category(request, cat_id):
 	context_dict = {}
 	context_dict['result_list']=	None
 	context_dict['query']=	 None
-	if request.method=='POST':
-		query=	request.POST['query'].strip()
-		if query:
-			result_list=	run_query(query)
-			context_dict['result_list']=	result_list
-			context_dict['query']=	query
 	try:
 		category                      = Category.objects.get(id=cat_id)
 		pages                         = Page.objects.filter(category=category).order_by('-views')
@@ -55,8 +49,15 @@ def category(request, cat_id):
 		context_dict['cat_id']        = cat_id
 	except Category.DoesNotExist:
 		pass
-	if not context_dict['query']:
-		context_dict['query']=	category.name
+	if request.method=='POST':
+		query=	request.POST['query'].strip()
+		if query:
+			result_list=	run_query(query)
+			context_dict['result_list']=	result_list
+			context_dict['query']=	query
+		if not context_dict['query']:
+			context_dict['query']=	category.name
+	# if request.method == 'GET':
 	return render(request, 'rango/category.html', context_dict)
 
 from rango.forms import CategoryForm
@@ -108,20 +109,24 @@ def search(request):
 			result_list=run_query(query)
 	return render(request, 'rango/search.html', {'result_list': result_list})
 
-def track_url(request):
-	page_id=	None
-	url=	'/rango/'
-	if request.method== 'GET':
-		if page_id in request.GET:
-			page_id=	request.GET['page_id']
-			try:
-				page=	Page.objects.get(id=page_id)
-				page.views=	page.views+1
-				page.save()
-				url=	page.url
-			except:
-				pass
-	return redirect(url)
+def page(request, page_id):
+	page=	Page.objects.get(id=page_id)
+	page.views=	page.views+1
+	page.save()
+	# page_id = 1
+	# page = None
+	# url=	'/rango/'
+	# if request.method== 'GET':
+	# 	if page_id in request.GET:
+	# 		page_id=	request.GET['page_id']
+	# 		try:
+	# 			page=	Page.objects.get(id=page_id)
+	# 			page.views=	page.views+1
+	# 			page.save()
+	# 			url='/rango/'+request.GET['page_id']
+	# 		except:
+	# 			pass
+	return render(request, 'rango/page.html', {'page': page})
 
 @login_required
 def like_category(request):
@@ -159,21 +164,21 @@ def suggest_category(request):
 
 @login_required
 def auto_add_page(request):
-    cat_id = None
-    url = None
-    title = None
-    context_dict = {}
-    if request.method == 'GET':
-        cat_id = request.GET['category_id']
-        url = request.GET['url']
-        title = request.GET['title']
-        if cat_id:
-            category = Category.objects.get(id=int(cat_id))
-            p = Page.objects.get_or_create(category=category, title=title, url=url)
+  cat_id = None
+  url = None
+  title = None
+  context_dict = {}
+  if request.method == 'GET':
+      cat_id = request.GET['category_id']
+      url = request.GET['url']
+      title = request.GET['title']
+      if cat_id:
+          category = Category.objects.get(id=int(cat_id))
+          p = Page.objects.get_or_create(category=category, title=title, url=url)
 
-            pages = Page.objects.filter(category=category).order_by('-views')
+          pages = Page.objects.filter(category=category).order_by('-views')
 
-            # Adds our results list to the template context under name pages.
-            context_dict['pages'] = pages
+          # Adds our results list to the template context under name pages.
+          context_dict['pages'] = pages
 
-    return render(request, 'rango/page_list.html', context_dict)
+  return render(request, 'rango/page_list.html', context_dict)
