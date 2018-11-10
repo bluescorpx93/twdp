@@ -8,3 +8,9 @@ Followed a tutorial to implement
 #### Backend - Django
 #### Frontend Design - Bootstrap 
 #### Databsae - SQLite3
+
+To test this, follow
+```sh
+$ cd twdp
+$ python manage.py runserver
+```
